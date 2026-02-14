@@ -52,7 +52,7 @@ Use this skill when the user:
 - Network policies and CNI
 - Storage classes and PV management
 
-**Note**: This skill focuses on application delivery automation. For infrastructure and platform concerns, use cloud platform engineering skills.
+**Note**: This skill focuses on application delivery automation. For infrastructure and platform concerns, use the **cloud-platform-engineer** skill.
 
 ---
 
