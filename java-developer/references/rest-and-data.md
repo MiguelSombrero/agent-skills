@@ -1,6 +1,6 @@
 # REST API, DTOs, and Spring Data JPA
 
-Reference for java-developer skill. See [SKILL.md](SKILL.md) for core instructions.
+Reference for java-developer skill. See [SKILL.md](../SKILL.md) for core instructions.
 
 ---
 

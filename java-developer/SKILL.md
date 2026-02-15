@@ -196,11 +196,11 @@ public class Order {
 
 For detailed patterns and examples, see these reference files:
 
-- **REST API, DTOs, Spring Data JPA**: [reference-rest-and-data.md](reference-rest-and-data.md) — Controllers, validation, error handling, repositories, entity relationships, transactions
-- **Spring Security and JWT**: [reference-security.md](reference-security.md) — Security config, JWT auth, method security
-- **Testing**: [reference-testing.md](reference-testing.md) — Unit, integration, controller, E2E tests with TestContainers
-- **Cross-cutting, config, performance**: [reference-operations.md](reference-operations.md) — Logging, monitoring, tracing, health, application.yml, caching, async
-- **Clean code and anti-patterns**: [reference-patterns.md](reference-patterns.md) — Naming, method design, anemic domain, god service, transaction anti-patterns, checklist
+- **REST API, DTOs, Spring Data JPA**: [rest-and-data.md](references/rest-and-data.md) — Controllers, validation, error handling, repositories, entity relationships, transactions
+- **Spring Security and JWT**: [security.md](references/security.md) — Security config, JWT auth, method security
+- **Testing**: [testing.md](references/testing.md) — Unit, integration, controller, E2E tests with TestContainers
+- **Cross-cutting, config, performance**: [operations.md](references/operations.md) — Logging, monitoring, tracing, health, application.yml, caching, async
+- **Clean code and anti-patterns**: [patterns.md](references/patterns.md) — Naming, method design, anemic domain, god service, transaction anti-patterns, checklist
 
 ---
 

@@ -1,6 +1,6 @@
 # Clean Code and Anti-Patterns
 
-Reference for java-developer skill. See [SKILL.md](SKILL.md) for core instructions.
+Reference for java-developer skill. See [SKILL.md](../SKILL.md) for core instructions.
 
 ---
 
