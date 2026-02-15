@@ -241,8 +241,10 @@ public record ValidationErrorResponse(
 
 ### Repository Pattern
 
+Repository interfaces belong to the domain layer. They return aggregates and value objects; implementations live in infrastructure.
+
 ```java
-// Repository interface
+// Repository interface (domain layer)
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
@@ -304,7 +306,32 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 public record UserSearchCriteria(String name, String email, Boolean active) {}
 ```
 
-### Entity Relationships
+### Value Objects
+
+Use value objects for domain concepts: immutable, validated in constructor, no identity.
+
+```java
+public record Money(BigDecimal amount, Currency currency) {
+    public Money {
+        Objects.requireNonNull(amount);
+        Objects.requireNonNull(currency);
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+    }
+}
+
+public record Email(String value) {
+    public Email {
+        Objects.requireNonNull(value);
+        if (!value.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+    }
+}
+```
+
+### Entity Relationships and Rich Domain
 
 ```java
 @Entity
@@ -320,11 +347,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // One-to-Many
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
-    // Many-to-Many
     @ManyToMany
     @JoinTable(
         name = "user_roles",
@@ -333,7 +358,15 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // Helper methods
+    public static User create(String name, String email, String passwordHash) {
+        User user = new User();
+        user.name = requireNonNull(name);
+        user.email = requireNonNull(email);
+        user.passwordHash = requireNonNull(passwordHash);
+        user.active = true;
+        return user;
+    }
+
     public void addOrder(Order order) {
         orders.add(order);
         order.setUser(this);
@@ -344,15 +377,8 @@ public class User {
         order.setUser(null);
     }
 
-    public void addRole(Role role) {
-        roles.add(role);
-        role.getUsers().add(this);
-    }
-
-    public void removeRole(Role role) {
-        roles.remove(role);
-        role.getUsers().remove(this);
-    }
+    public void activate() { this.active = true; }
+    public void deactivate() { this.active = false; }
 }
 
 @Entity
@@ -362,17 +388,56 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Many-to-One
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private BigDecimal total;
+    private OrderStatus status = OrderStatus.PENDING;
+    private BigDecimal total = BigDecimal.ZERO;
 
-    // Avoid N+1 queries with proper fetch strategies
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+
+    public static Order create(User user, List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Order must have at least one item");
+        }
+        Order order = new Order();
+        order.user = requireNonNull(user);
+        order.status = OrderStatus.PENDING;
+        items.forEach(order::addItem);
+        return order;
+    }
+
+    public void addItem(OrderItem item) {
+        if (status != OrderStatus.PENDING) {
+            throw new IllegalStateException("Cannot add items to confirmed order");
+        }
+        requireNonNull(item);
+        items.add(item);
+        recalculateTotal();
+    }
+
+    public void confirm() {
+        if (status != OrderStatus.PENDING) {
+            throw new IllegalStateException("Order already confirmed");
+        }
+        status = OrderStatus.CONFIRMED;
+    }
+
+    public void cancel() {
+        if (status == OrderStatus.SHIPPED) {
+            throw new IllegalStateException("Cannot cancel shipped order");
+        }
+        status = OrderStatus.CANCELLED;
+    }
+
+    public BigDecimal getTotal() { return total; }
+    private void recalculateTotal() {
+        total = items.stream()
+            .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }
 
 // DTO projection to avoid fetching entire entity
@@ -396,29 +461,34 @@ public interface UserRepository extends JpaRepository<User, Long> {
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
     private final InventoryService inventoryService;
     private final PaymentService paymentService;
 
     public OrderService(OrderRepository orderRepository,
+                       UserRepository userRepository,
                        InventoryService inventoryService,
                        PaymentService paymentService) {
         this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
         this.inventoryService = inventoryService;
         this.paymentService = paymentService;
     }
 
     @Transactional
     public Order placeOrder(CreateOrderRequest request) {
-        // All operations in same transaction
-        Order order = Order.create(request.items());
+        User user = userRepository.findById(request.userId())
+            .orElseThrow(() -> new UserNotFoundException(request.userId()));
+        List<OrderItem> items = request.items().stream()
+            .map(i -> new OrderItem(i.productId(), i.unitPrice(), i.quantity()))
+            .toList();
 
-        // Reserve inventory
+        Order order = Order.create(user, items);
+
         inventoryService.reserveItems(order.getItems());
-
-        // Process payment
         paymentService.processPayment(order.getTotal());
 
-        // Save order
+        order.confirm();
         return orderRepository.save(order);
     }
 

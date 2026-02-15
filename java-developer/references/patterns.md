@@ -135,13 +135,11 @@ private void processPayment(Long customerId, BigDecimal amount) {
 }
 
 private Order createAndSaveOrder(OrderRequest request, BigDecimal total) {
-    Order order = Order.builder()
-        .customerId(request.customerId())
-        .items(request.items())
-        .total(total)
-        .status(OrderStatus.CONFIRMED)
-        .build();
-
+    List<OrderItem> items = request.items().stream()
+        .map(i -> new OrderItem(i.productId(), i.price(), i.quantity()))
+        .toList();
+    Order order = Order.create(request.customerId(), items);
+    order.confirm();  // Payment processed; domain enforces transition
     return orderRepository.save(order);
 }
 ```
@@ -202,12 +200,31 @@ public class OrderService {
     }
 }
 
-// ✅ Good - Rich domain model
+// ✅ Good - Rich domain model with factory and invariants
 @Entity
 public class Order {
     private Long id;
+    private Long customerId;
     private OrderStatus status;
-    private List<OrderItem> items;
+    private List<OrderItem> items = new ArrayList<>();
+
+    public static Order create(Long customerId, List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Order must have at least one item");
+        }
+        Order order = new Order();
+        order.customerId = customerId;
+        order.status = OrderStatus.PENDING;
+        items.forEach(order::addItem);
+        return order;
+    }
+
+    public void addItem(OrderItem item) {
+        if (status != OrderStatus.PENDING) {
+            throw new IllegalStateException("Cannot add items to confirmed order");
+        }
+        items.add(item);
+    }
 
     public void ship() {
         if (status != OrderStatus.CONFIRMED) {
@@ -222,7 +239,7 @@ public class Order {
 public class OrderService {
     public void shipOrder(Long orderId) {
         Order order = findById(orderId);
-        order.ship(); // Business logic in domain
+        order.ship();  // Business logic in domain
         orderRepository.save(order);
     }
 }
@@ -306,9 +323,15 @@ private void processOrderBatch(List<Order> orders) {
 
 - [ ] Clear layered architecture (presentation, application, domain, infrastructure)
 - [ ] Domain logic in domain models, not services
+- [ ] Ubiquitous language used in domain types and methods
+- [ ] Value objects for domain concepts (Money, Email, etc.) where appropriate
+- [ ] Invariants enforced inside aggregates
+- [ ] No anemic domain models
 - [ ] Dependencies point inward (DIP)
 - [ ] Each class has single responsibility
 - [ ] Interfaces used for abstraction
+
+For DDD anti-patterns and rich domain guidance, see [ddd-and-domain-model.md](ddd-and-domain-model.md).
 
 **REST API:**
 

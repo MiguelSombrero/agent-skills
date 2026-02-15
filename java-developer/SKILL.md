@@ -1,11 +1,11 @@
 ---
 name: java-developer
-description: Senior Java developer specializing in Spring Boot applications with expertise in clean architecture, testing, and cloud-native patterns. Use when developing REST APIs, implementing Spring Security, designing testable code, refactoring for maintainability, or working with Spring Data JPA. Focuses on TDD, SOLID principles, and modern Spring Boot best practices with latest Java and Spring Boot versions.
+description: Senior Java developer specializing in Spring Boot applications with Domain-Driven Design (DDD) and rich domain models. Expertise in clean architecture, testing, and cloud-native patterns. Use when developing REST APIs, implementing Spring Security, designing domain models, structuring aggregates and value objects, refactoring for maintainability, or working with Spring Data JPA. Focuses on DDD, rich domain models, TDD, SOLID principles, and modern Spring Boot best practices with latest Java and Spring Boot versions.
 ---
 
 # Java Developer
 
-Builds production-ready, cloud-native Spring Boot applications with emphasis on clean architecture, comprehensive testing, and maintainable code. Combines deep Spring Framework knowledge with architectural principles and testing best practices.
+Builds production-ready, cloud-native Spring Boot applications with emphasis on Domain-Driven Design, rich domain models, clean architecture, comprehensive testing, and maintainable code. Combines deep Spring Framework knowledge with DDD tactical patterns and testing best practices.
 
 ## When to Use This Skill
 
@@ -23,6 +23,7 @@ Use this skill when the user:
 - Wants to implement **validation** or data binding
 - Needs guidance on **dependency injection** or Spring beans
 - Asks "how should I structure..." or "what's the best way in Spring Boot..."
+- Wants to apply **Domain-Driven Design (DDD)** or **rich domain models**
 - Wants to apply **SOLID principles** or design patterns
 - Needs help with **Spring Boot starters** or auto-configuration
 
@@ -89,11 +90,11 @@ public class UserService {
 
     @Transactional
     public User createUser(CreateUserRequest request) {
-        User user = User.builder()
-            .email(request.email())
-            .passwordHash(passwordEncoder.encode(request.password()))
-            .name(request.name())
-            .build();
+        User user = User.create(
+            request.name(),
+            request.email(),
+            passwordEncoder.encode(request.password())
+        );
         return userRepository.save(user);
     }
 }
@@ -121,12 +122,34 @@ public class OrderService {
 ```java
 @Test
 void shouldCalculateOrderTotal() {
-    Order order = new Order();
-    order.addItem(new OrderItem(new BigDecimal("10.00"), 2));
-    order.addItem(new OrderItem(new BigDecimal("5.00"), 1));
-    assertThat(order.calculateTotal()).isEqualByComparingTo(new BigDecimal("25.00"));
+    Order order = Order.create(1L, List.of(
+        new OrderItem(new BigDecimal("10.00"), 2),
+        new OrderItem(new BigDecimal("5.00"), 1)
+    ));
+    assertThat(order.getTotal()).isEqualByComparingTo(new BigDecimal("25.00"));
 }
 ```
+
+### Domain-Driven Design (DDD)
+
+Apply tactical DDD patterns to model the domain explicitly:
+
+- **Ubiquitous Language**: Use domain terms in code (e.g., `order.ship()`, `OrderStatus.CONFIRMED`) instead of technical jargon
+- **Bounded Contexts**: Delineate clear model boundaries per subdomain; avoid mixing concerns across contexts
+- **Aggregates**: Cluster related entities with a root; enforce invariants at aggregate boundaries; load/save aggregate roots
+- **Value Objects**: Immutable types defined by attributes (e.g., `Money`, `Email`) rather than identity; validate in constructor
+- **Domain Events**: Model significant domain occurrences explicitly for decoupling and auditability
+
+### Rich Domain Model
+
+Put business logic and invariants in domain entities—not in services:
+
+- Use **factory methods** (`Order.create(...)`) instead of public constructors or builders for entities
+- Prefer expressive domain methods (`order.ship()`, `order.confirm()`) over procedural service logic (`order.setStatus(SHIPPED)`)
+- Enforce invariants inside the aggregate; reject invalid state at the boundary
+- Avoid anemic models (getters/setters only with no behavior)
+
+For detailed DDD and rich domain patterns, see [ddd-and-domain-model.md](references/ddd-and-domain-model.md).
 
 ---
 
@@ -140,7 +163,7 @@ void shouldCalculateOrderTotal() {
 ├─────────────────────────────────────────┤
 │         Application Layer               │  Services, Use Cases
 ├─────────────────────────────────────────┤
-│         Domain Layer                    │  Entities, Value Objects
+│         Domain Layer                    │  Aggregates, Value Objects, Domain Events
 ├─────────────────────────────────────────┤
 │         Infrastructure Layer            │  Repositories, External APIs
 └─────────────────────────────────────────┘
@@ -148,46 +171,38 @@ void shouldCalculateOrderTotal() {
 
 ### Package Structure
 
+The Domain Layer is the heart of the design—it must not depend on infrastructure.
+
 ```
-com.example.app/
-├── api/controller/, api/dto/, api/mapper/
-├── application/service/, application/usecase/
-├── domain/model/, domain/repository/, domain/exception/, domain/valueobject/
-├── infrastructure/persistence/, infrastructure/external/, infrastructure/config/
-└── shared/exception/, shared/validation/
-```
-
-### Rich Domain Model
-
-Put business logic in domain entities, not services. Use factory methods, enforce invariants, avoid anemic models.
-
-```java
-@Entity
-@Table(name = "orders")
-public class Order {
-    private OrderStatus status;
-    private List<OrderItem> items = new ArrayList<>();
-
-    public static Order create(List<OrderItem> items) {
-        Order order = new Order();
-        order.status = OrderStatus.PENDING;
-        items.forEach(order::addItem);
-        return order;
-    }
-
-    public void addItem(OrderItem item) {
-        requireNonNull(item);
-        items.add(item);
-        recalculateTotal();
-    }
-
-    public void ship() {
-        if (status != OrderStatus.PENDING) {
-            throw new IllegalStateException("Can only ship pending orders");
-        }
-        status = OrderStatus.SHIPPED;
-    }
-}
+com.example.orderservice/   # Service name implies context
+├── api/
+│   ├── controller/
+│   ├── dto/
+│   └── mapper/             # DTO ↔ Domain mappers
+├── application/
+│   ├── service/
+│   └── port/
+├── domain/
+│   ├── aggregate/
+│   ├── entity/             # Domain entities like Order
+│   ├── valueobject/
+│   ├── service/
+│   ├── event/
+│   └── repository/
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── entity/         # JPA entities like OrderEntity
+│   │   ├── repository/
+│   │   └── mapper/         # Domain ↔ JPA mappers
+│   ├── external/           # External HTTP clients
+│   │   ├── client/
+│   │   ├── dto/
+│   │   ├── mapper/         # Anti-corruption layer
+│   │   └── config/
+│   ├── messaging/
+│   └── config/
+└── shared/
+    └── exception/
 ```
 
 ---
@@ -196,6 +211,7 @@ public class Order {
 
 For detailed patterns and examples, see these reference files:
 
+- **DDD and rich domain models**: [ddd-and-domain-model.md](references/ddd-and-domain-model.md) — Ubiquitous language, aggregates, value objects, domain events, anti-patterns
 - **REST API, DTOs, Spring Data JPA**: [rest-and-data.md](references/rest-and-data.md) — Controllers, validation, error handling, repositories, entity relationships, transactions
 - **Spring Security and JWT**: [security.md](references/security.md) — Security config, JWT auth, method security
 - **Testing**: [testing.md](references/testing.md) — Unit, integration, controller, E2E tests with TestContainers
@@ -208,13 +224,13 @@ For detailed patterns and examples, see these reference files:
 
 **Key Principles:**
 
+- Domain-Driven Design (DDD) and rich domain models
 - Test-driven development (TDD)
 - SOLID principles
 - Clean, maintainable code
-- Rich domain models
 - Comprehensive testing
 - Security by default
 - Performance optimization
 - Cloud-native patterns
 
-**Remember**: Write tests first, keep methods small, make domain models rich with behavior, and always favor maintainability over cleverness.
+**Remember**: Model the domain with ubiquitous language, make domain models rich with behavior and invariants, write tests first, keep methods small, and always favor maintainability over cleverness.

@@ -6,6 +6,8 @@ Reference for java-developer skill. See [SKILL.md](../SKILL.md) for core instruc
 
 ## Unit Tests (Lots of These!)
 
+Domain model unit tests focus on **behavior**: invariants, state transitions, and business rules. No mocks needed—test the rich domain logic directly.
+
 ```java
 // Service unit test - mock dependencies
 @ExtendWith(MockitoExtension.class)
@@ -32,11 +34,11 @@ class UserServiceTest {
             "Password123"
         );
 
-        User expectedUser = User.builder()
-            .id(1L)
-            .name(request.name())
-            .email(request.email())
-            .build();
+        User expectedUser = User.create(
+            request.name(),
+            request.email(),
+            "encodedPassword"
+        );
 
         when(passwordEncoder.encode(request.password()))
             .thenReturn("encodedPassword");
@@ -76,41 +78,41 @@ class UserServiceTest {
     }
 }
 
-// Domain model test - no mocks needed
+// Domain model test - tests rich domain behavior, no mocks
 class OrderTest {
+
+    private User testUser() {
+        return User.create("Test User", "test@example.com", "hash");
+    }
 
     @Test
     void shouldCalculateTotalCorrectly() {
-        // Arrange
-        Order order = new Order();
-        order.addItem(new OrderItem(new BigDecimal("10.00"), 2));
-        order.addItem(new OrderItem(new BigDecimal("5.50"), 3));
+        User user = testUser();
+        List<OrderItem> items = List.of(
+            new OrderItem(new BigDecimal("10.00"), 2),
+            new OrderItem(new BigDecimal("5.50"), 3)
+        );
+        Order order = Order.create(user, items);
 
-        // Act
-        BigDecimal total = order.getTotal();
-
-        // Assert
-        assertThat(total).isEqualByComparingTo(new BigDecimal("36.50"));
+        assertThat(order.getTotal()).isEqualByComparingTo(new BigDecimal("36.50"));
     }
 
     @Test
     void shouldNotAllowShippingOfCancelledOrder() {
-        // Arrange
-        Order order = new Order();
+        User user = testUser();
+        Order order = Order.create(user, List.of(new OrderItem(BigDecimal.TEN, 1)));
         order.cancel();
 
-        // Act & Assert
-        assertThatThrownBy(() -> order.ship())
+        assertThatThrownBy(order::ship)
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Cannot ship cancelled order");
+            .hasMessageContaining("ship");
     }
 
     @Test
     void shouldTransitionThroughValidStates() {
-        // Arrange
-        Order order = new Order();
+        User user = testUser();
+        Order order = Order.create(user, List.of(new OrderItem(BigDecimal.TEN, 1)));
 
-        // Act & Assert
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
 
         order.confirm();
@@ -118,9 +120,17 @@ class OrderTest {
 
         order.ship();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.SHIPPED);
+    }
 
-        order.deliver();
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.DELIVERED);
+    @Test
+    void shouldNotAllowAddingItemsAfterConfirmation() {
+        User user = testUser();
+        Order order = Order.create(user, List.of(new OrderItem(BigDecimal.TEN, 1)));
+        order.confirm();
+
+        assertThatThrownBy(() -> order.addItem(new OrderItem(BigDecimal.ONE, 1)))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Cannot add items");
     }
 }
 ```
@@ -156,11 +166,7 @@ class UserRepositoryIntegrationTest {
     @Test
     void shouldSaveAndRetrieveUser() {
         // Arrange
-        User user = User.builder()
-            .name("John Doe")
-            .email("john@example.com")
-            .passwordHash("hashedPassword")
-            .build();
+        User user = User.create("John Doe", "john@example.com", "hashedPassword");
 
         // Act
         User saved = userRepository.save(user);
@@ -178,11 +184,7 @@ class UserRepositoryIntegrationTest {
     @Test
     void shouldFindUserByEmail() {
         // Arrange
-        User user = User.builder()
-            .name("Jane Doe")
-            .email("jane@example.com")
-            .passwordHash("hashedPassword")
-            .build();
+        User user = User.create("Jane Doe", "jane@example.com", "hashedPassword");
         entityManager.persist(user);
         entityManager.flush();
 
