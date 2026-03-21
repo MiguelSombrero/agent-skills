@@ -1,0 +1,59 @@
+---
+description: "Project context — stack, structure, architecture for externa service. Always applied."
+alwaysApply: true
+---
+
+# Project Context
+
+## Overview
+
+- Java Spring Boot 4 web application, RESTful API, Maven (never Gradle)
+- Language: **Java 25** — records, sealed classes, pattern matching, text blocks, virtual threads where applicable
+- Architecture: **DDD + Hexagonal** (Ports & Adapters) — applied loosely and pragmatically
+
+## Technology Stack
+
+- Spring Boot 4 / Spring Framework 7 / Spring Security 7 — latest major versions
+- SpringDoc OpenAPI 3, Jakarta Bean Validation 4
+- JUnit 5 + Mockito + AssertJ, Micrometer + Actuator, HAPI FHIR client 8.x
+
+## Project Structure
+
+```
+com/github/miguelsombrero/example
+├── api/                     # Driving adapters
+│   ├── controller/          # REST controllers
+│   ├── mapper/              # DTO <-> Domain mappers
+│   └── dto/                 # API request/response DTOs (records)
+├── config/                  # Shared Spring @Configuration
+├── exception/               # Exception classes and @RestControllerAdvice
+├── domain/                  # Pure domain — entities, value objects, aggregates
+├── infrastructure/          # Driven adapters
+│   ├── client/              # HTTP client adapter (port implementation)
+│   ├── config/              # External service config
+│   └── mapper/              # External service <-> Domain mappers
+├── service/                 # Application layer — port interfaces + use cases
+└── util/                    # Utilities
+```
+
+**Layer mapping (DDD/Hexagonal applied loosely):**
+
+- `domain/` — Pure domain. **No framework dependencies.** Entities, value objects, aggregates.
+- `service/` — Thin application layer. Contains port interfaces and use-case orchestrators (no separate `application/` package).
+- `api/` — Driving adapters. REST controllers, DTOs, mappers.
+- `infrastructure/` — Driven adapters.
+
+**Dependency rule:** domain → service → api/infrastructure. Never the reverse.
+
+## Base Package & Build
+
+- **Base package:** `com.github.miguelsombrero.*`
+- **Build command:** `mvn test`
+- **Test sources:** `src/test/java/com/github/miguelsombrero/*/`
+
+## Conventions
+
+- Constructor injection only — Lombok `@RequiredArgsConstructor`, `private final` fields
+- One class per file; package names lowercase singular nouns
+- Business logic in domain; never in controllers or adapters
+- Ports defined in `service/`; adapters in `api/` and `infrastructure/`
