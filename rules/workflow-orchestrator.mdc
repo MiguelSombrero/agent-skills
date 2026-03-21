@@ -17,7 +17,7 @@ until you reach FEATURE COMPLETE or an explicit blocker that requires human inpu
 
 Invoke: @planning-agent.mdc
 Input: the feature description provided by the user
-Wait for: `READY FOR TEST PLANNING: docs/specs/[FEATURE_NAME].md`
+Wait for: `READY FOR TEST PLANNING: .agent-works/specs/[FEATURE_NAME].md`
 Then: proceed immediately to Phase 2
 
 ### PHASE 2 — Test Planning
@@ -45,7 +45,7 @@ Invoke all 4 simultaneously as subagents:
   Input to each: the implemented test and changed files from Phase 3
   Wait for: all 4 subagents to write their findings files
   Then: invoke @reviewer-agent.mdc to consolidate findings
-  Read consolidated output from `docs/review-findings/[FEATURE_NAME]-[iteration]-consolidated.md`
+  Read consolidated output from `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-consolidated.md`
 
 ### PHASE 4.1 — Fix Loop (conditional)
 

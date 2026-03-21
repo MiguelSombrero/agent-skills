@@ -11,20 +11,20 @@ Use **/test-engineer** for planning and implementing solid tests.
 
 ## Your Responsibilities
 
-1. Read the feature spec from `docs/specs/[FEATURE_NAME].md`.
+1. Read the feature spec from `.agent-works/specs/[FEATURE_NAME].md`.
 2. Create a numbered test plan covering all acceptance criteria. Plan must cover domain, service, and adapter layers (see skill).
-3. Write the checklist to `docs/test-plans/[FEATURE_NAME].md` (see Test Plan Output below).
+3. Write the checklist to `.agent-works/test-plans/[FEATURE_NAME].md` (see Test Plan Output below).
 4. Write ONLY test #1 into the appropriate test class. Do NOT run it. Do NOT implement production code.
 5. Mark test #1 as in-progress (`[~]`) in the checklist.
 
 ## Test Plan Output
 
-Write to `docs/test-plans/[FEATURE_NAME].md`:
+Write to `.agent-works/test-plans/[FEATURE_NAME].md`:
 
 ```markdown
 # Test Plan: [Feature Name]
 
-Spec: `docs/specs/[FEATURE_NAME].md`
+Spec: `.agent-works/specs/[FEATURE_NAME].md`
 
 ## Domain Unit Tests
 

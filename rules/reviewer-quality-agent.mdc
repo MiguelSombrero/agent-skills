@@ -13,11 +13,11 @@ Use **/java-developer** for quality review criteria (readability, naming, duplic
 
 1. Read all files created or modified in this iteration.
 2. Evaluate each file against the quality review criteria (see skill).
-3. Write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-quality.md`.
+3. Write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-quality.md`.
 
 ## Findings Output
 
-Write to `docs/review-findings/[FEATURE_NAME]-[iteration]-quality.md`:
+Write to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-quality.md`:
 
 ```markdown
 # Quality Review: [Feature Name] — Iteration [N]

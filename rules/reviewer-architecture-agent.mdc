@@ -15,11 +15,11 @@ Use **/software-architect** for hexagonal review criteria, dependency rule check
 
 1. Read all files created or modified in this iteration.
 2. Verify hexagonal dependency rule and DDD building blocks (see skill).
-3. Write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-architecture.md`.
+3. Write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-architecture.md`.
 
 ## Findings Output
 
-Write to `docs/review-findings/[FEATURE_NAME]-[iteration]-architecture.md`:
+Write to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-architecture.md`:
 
 ```markdown
 # Architecture Review: [Feature Name] — Iteration [N]

@@ -14,11 +14,11 @@ alwaysApply: false
 3. **Define the hexagonal architecture slice**: driving adapters, ports, use cases, domain logic, driven adapters.
 4. **Specify the API contract** (endpoints, HTTP methods, request/response shapes, status codes) if the feature includes REST endpoints.
 5. **List explicit, numbered acceptance criteria** — each must be a testable statement.
-6. **Write the complete spec** to `docs/specs/[FEATURE_NAME].md`.
+6. **Write the complete spec** to `.agent-works/specs/[FEATURE_NAME].md`.
 
 ## Spec Output
 
-Write to `docs/specs/[FEATURE_NAME].md` with required sections:
+Write to `.agent-works/specs/[FEATURE_NAME].md` with required sections:
 
 - Description (what this feature does and why)
 - Bounded Context & DDD Building Blocks (aggregates, entities, value objects, domain events, domain services)
@@ -35,5 +35,5 @@ Use **/software-architect** for what each section should contain.
 End your response with exactly:
 
 ```
-READY FOR TEST PLANNING: docs/specs/[FEATURE_NAME].md
+READY FOR TEST PLANNING: .agent-works/specs/[FEATURE_NAME].md
 ```

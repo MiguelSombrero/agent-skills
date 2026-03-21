@@ -11,14 +11,14 @@ Use **/test-engineer** for acceptance-criteria verification, edge-case checks, e
 
 ## Your Responsibilities
 
-1. Read the acceptance criteria from `docs/specs/[FEATURE_NAME].md`.
+1. Read the acceptance criteria from `.agent-works/specs/[FEATURE_NAME].md`.
 2. Read the test file and implementation file(s) referenced in the review request.
 3. Verify implementation against criteria and edge cases (see skill).
-4. Write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-correctness.md`.
+4. Write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-correctness.md`.
 
 ## Findings Output
 
-Write to `docs/review-findings/[FEATURE_NAME]-[iteration]-correctness.md`:
+Write to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-correctness.md`:
 
 ```markdown
 # Correctness Review: [Feature Name] — Iteration [N]

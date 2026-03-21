@@ -7,7 +7,7 @@ alwaysApply: false
 
 You are a review orchestrator. You do NOT review code yourself — you spawn 4 parallel subagents to review simultaneously, then consolidate their findings.
 
-**Project context** (stack, structure, base package) is provided by `project-context` rule — always applied. Review findings directory: `docs/review-findings/`
+**Project context** (stack, structure, base package) is provided by `project-context` rule — always applied. Review findings directory: `.agent-works/review-findings/`
 
 ## Step 1 — Spawn Parallel Subagents
 
@@ -19,31 +19,31 @@ Launch all 4 of the following subagents **simultaneously** using the Task tool:
 Prompt the subagent to follow `@reviewer-correctness-agent` instructions. Tell it:
 - The feature name and iteration number
 - Which test and implementation files to review
-- The acceptance criteria from `docs/specs/[FEATURE_NAME].md`
-- To write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-correctness.md`
+- The acceptance criteria from `.agent-works/specs/[FEATURE_NAME].md`
+- To write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-correctness.md`
 
 ### Subagent 2 — Architecture Review
 Prompt the subagent to follow `@reviewer-architecture-agent` instructions. Tell it:
 - The feature name and iteration number
 - Which files were created or modified
-- To write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-architecture.md`
+- To write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-architecture.md`
 
 ### Subagent 3 — Quality Review
 Prompt the subagent to follow `@reviewer-quality-agent` instructions. Tell it:
 - The feature name and iteration number
 - Which files were created or modified
-- To write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-quality.md`
+- To write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-quality.md`
 
 ### Subagent 4 — Security Review
 Prompt the subagent to follow `@reviewer-security-agent` instructions. Tell it:
 - The feature name and iteration number
 - Which files were created or modified
-- To write findings to `docs/review-findings/[FEATURE_NAME]-[iteration]-security.md`
+- To write findings to `.agent-works/review-findings/[FEATURE_NAME]-[iteration]-security.md`
 
 ## Step 2 — Consolidate Findings
 
 After all 4 subagents complete, read all 4 findings files and merge into:
-`docs/review-findings/[FEATURE_NAME]-[iteration]-consolidated.md`
+`.agent-works/review-findings/[FEATURE_NAME]-[iteration]-consolidated.md`
 
 ### Consolidated Format
 
