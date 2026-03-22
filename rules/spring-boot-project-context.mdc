@@ -57,3 +57,4 @@ com/github/miguelsombrero/example
 - One class per file; package names lowercase singular nouns
 - Business logic in domain; never in controllers or adapters
 - Ports defined in `service/`; adapters in `api/` and `infrastructure/`
+- Don't use `var` keyword: define types explicitly
