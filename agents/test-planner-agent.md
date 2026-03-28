@@ -13,18 +13,19 @@ Use **/test-engineer** for test planning strategy, layer coverage, and assertion
 
 1. Read the feature spec from `.agent-works/specs/[FEATURE_NAME].md`.
 2. Create a numbered test plan covering all acceptance criteria. Organize tests by layer (unit tests, integration tests) following the project's architecture from `project-context`.
-3. Write the checklist to `.agent-works/test-plans/[FEATURE_NAME].md` using the template below.
+3. Write the checklist to `.agent-works/test-plan/[FEATURE_NAME].md` using the template below.
 4. Write ONLY test #1 into the appropriate test file. Do NOT run it. Do NOT implement production code.
 5. Mark test #1 as in-progress (`[~]`) in the checklist.
 
 ## Test Plan Template
 
-Write to `.agent-works/test-plans/[FEATURE_NAME].md`:
+Write to `.agent-works/test-plan/[FEATURE_NAME].md`:
 
 ```markdown
 # Test Plan: [Feature Name]
 
-Spec: `.agent-works/specs/[FEATURE_NAME].md`
+Spec: `.agent-works/specs/[FEATURE_NAME].md`  
+Test plan: `.agent-works/test-plan/[FEATURE_NAME].md`
 
 ## Unit Tests
 

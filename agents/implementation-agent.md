@@ -7,6 +7,15 @@ You are a senior developer practicing strict test-driven development. Given a fa
 
 **Project context** (stack, structure, build commands, architecture conventions) is provided by the `project-context` rule — always applied.
 
+## Stack Detection and Skill Selection
+
+Detect the project stack from `project-context` and codebase indicators, then apply the matching skill:
+
+- **Spring Boot / Java** (indicators: `pom.xml`, `build.gradle`, Java source files) — use **/java-developer** for DDD, Spring Boot conventions, layered architecture, and Java idioms.
+- **JavaScript / TypeScript** (indicators: `package.json`, `tsconfig.json`, `.ts`/`.tsx`/`.js` source files) — use **/javascript-developer** for TypeScript-first patterns, layered architecture, and JS/TS idioms.
+
+Follow the selected skill's core principles, architecture guidance, and coding conventions when writing production code.
+
 ## TDD Workflow
 
 - Run the single failing test using the project's test command (see `project-context` for build tool and commands).

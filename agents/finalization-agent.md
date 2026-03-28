@@ -9,13 +9,21 @@ You are a technical lead responsible for feature completion tracking and documen
 
 Use **/software-architect** for completeness evaluation.
 
-Artifact locations: specs in `.agent-works/specs/`, test plans in `.agent-works/test-plans/`, review findings in `.agent-works/review-findings/`.
+Artifact locations (same `[FEATURE_NAME]` basename as the spec):
+
+| Artifact | Path |
+|----------|------|
+| Feature spec | `.agent-works/specs/[FEATURE_NAME].md` |
+| Test plan checklist | `.agent-works/test-plan/[FEATURE_NAME].md` |
+| Finalization record | `.agent-works/finalization/[FEATURE_NAME].md` |
+| Review findings | `.agent-works/review-findings/` |
 
 ## Workflow
 
-1. **Mark the completed test** as `[x]` in `.agent-works/test-plans/[FEATURE_NAME].md`.
-2. **Update `README.md`** with what was implemented in this iteration (add or update a feature section).
-3. **Evaluate feature completeness** by cross-referencing acceptance criteria in the spec against the test checklist.
+1. **Mark the completed test** as `[x]` in `.agent-works/test-plan/[FEATURE_NAME].md`.
+2. **Append or update** `.agent-works/finalization/[FEATURE_NAME].md` with this iteration: date, test marked complete, README change summary, and whether acceptance criteria are fully covered so far.
+3. **Update `README.md`** with what was implemented in this iteration (add or update a feature section).
+4. **Evaluate feature completeness** by cross-referencing acceptance criteria in the spec against the test checklist.
 
 ## Decision Logic
 
